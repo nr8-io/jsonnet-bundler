@@ -1,0 +1,126 @@
+{
+	"$defs": {
+		"konn:schema:bitwarden-secrets": {
+			"$id": "konn:schema:bitwarden-secrets",
+			"$schema": "https://json-schema.org/draft/2020-12/schema",
+			"dependentRequired": {
+				"createSecretStore": ["organizationId", "projectId"]
+			},
+			"description": "Creates a bitwarden external secret and a secret store for the vault",
+			"properties": {
+				"createSecretStore": {
+					"default": true,
+					"title": "If a secret store should be created",
+					"type": "boolean"
+				},
+				"createSecrets": {
+					"default": true,
+					"title": "If empty Secret should be created with empty keys",
+					"type": "boolean"
+				},
+				"organizationId": {
+					"description": "The organization id of the bitwarden vault",
+					"format": "uuid",
+					"title": "Organization ID",
+					"type": "string"
+				},
+				"projectId": {
+					"format": "uuid",
+					"title": "The project id of the bitwarden vault",
+					"type": "string"
+				},
+				"secretStore": {
+					"default": "bitwarden",
+					"description": "The name of the secret store",
+					"minLength": 1,
+					"oneOf": [
+						{
+							"type": "string"
+						},
+						{
+							"type": "number"
+						}
+					],
+					"title": "Secret store"
+				},
+				"secrets": {
+					"additionalProperties": {
+						"default": {},
+						"description": "map of secrets to create",
+						"properties": {
+							"createPushSecret": {
+								"default": true,
+								"title": "If a push secret should be created for this secret",
+								"type": "boolean"
+							},
+							"createSecret": {
+								"title": "Optional override for global createSecrets",
+								"type": "boolean"
+							},
+							"forcePushSync": {
+								"default": "1",
+								"title": "Add force sync annotation to the push secret",
+								"type": "string"
+							},
+							"forceSync": {
+								"default": "1",
+								"title": "Add force sync annotation",
+								"type": "string"
+							},
+							"keys": {
+								"default": [],
+								"description": "The keys to be synced with bitwarden secrets",
+								"examples": ["[key1, key2, key3]"],
+								"items": {
+									"title": "key name",
+									"type": "string"
+								},
+								"type": "array"
+							},
+							"pushRefreshInterval": {
+								"title": "Optional refresh interval for the push secret, default is null",
+								"type": "string"
+							},
+							"refreshInterval": {
+								"default": "1m",
+								"title": "Optional refresh interval for the external secret, default is 1m, nullable",
+								"type": "string"
+							}
+						},
+						"required": ["keys"],
+						"title": "secrets",
+						"type": "object"
+					},
+					"default": {},
+					"description": "map of secrets to create",
+					"title": "secrets",
+					"type": "object"
+				}
+			},
+			"required": ["secretStore"],
+			"title": "Bitwarden secrets",
+			"type": "object"
+		}
+	},
+	"$id": "konn:schema:root",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"properties": {
+		"bitwardenSecrets": {
+			"$ref": "#/$defs/konn:schema:bitwarden-secrets"
+		},
+		"extensions": {
+			"default": {},
+			"description": "Map of extensions to apply",
+			"properties": {
+				"schema": {
+					"default": false,
+					"title": "enable schema extension",
+					"type": "boolean"
+				}
+			},
+			"title": "extensions",
+			"type": "object"
+		}
+	},
+	"type": "object"
+}
