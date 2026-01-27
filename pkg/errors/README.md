@@ -1,0 +1,1 @@
+Copied from jsonnet-go/internal
