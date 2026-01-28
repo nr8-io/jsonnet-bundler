@@ -101,19 +101,42 @@ func collectVarReplacement(ctx *Context, node ast.Node, oldName string, newName 
 }
 
 func collectLocalBindReplacements(ctx *Context, node ast.Node) {
+	fmt.Printf("TYPE: %T (begin: %v, end: %v)\n", node, node.Loc().Begin, node.Loc().End)
 	switch n := node.(type) {
 	case *ast.Local:
 		for _, b := range n.Binds {
 			rep, err := collectLocalBindReplacement(ctx, b, string(b.Variable), ctx.prefix+"_"+string(b.Variable))
+
 			if err == nil {
 				ctx.replacements = append(ctx.replacements, *rep)
 				ctx.localBinds[string(b.Variable)] = struct{}{}
 			}
 		}
-	}
 
-	for _, child := range parser.Children(node) {
-		collectLocalBindReplacements(ctx, child)
+		// parser gives back [node.Body, ...n.Binds]
+		children := parser.Children(node)
+
+		// look for supported import nodes among the children
+		for _, child := range children[1:] {
+			switch child.(type) {
+			case *ast.Import:
+				fmt.Println("Import node found")
+			case *ast.ImportStr:
+				fmt.Println("ImportStr node found")
+			case *ast.ImportBin:
+				fmt.Println("ImportBin node found")
+			default:
+				// handle other child nodes recursively
+				collectLocalBindReplacements(ctx, child)
+			}
+		}
+
+		// Continue to the body of the local expression
+		collectLocalBindReplacements(ctx, n.Body)
+	default:
+		for _, child := range parser.Children(node) {
+			collectLocalBindReplacements(ctx, child)
+		}
 	}
 }
 
